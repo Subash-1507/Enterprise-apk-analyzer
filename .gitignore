@@ -1,0 +1,12 @@
+# Ignore extracted APK data
+unpacked_data/
+
+# Ignore actual APK files (too large for GitHub and potential copyright/malware issues)
+*.apk
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Ignore environment variable files (just in case you ever make one)
+.env
