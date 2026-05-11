@@ -16,9 +16,11 @@ An automated, enterprise-grade Static Application Security Testing (SAST) tool e
 > **Note for recruiter/reviewer:** Below are the execution logs and the generated HTML Security Dashboard, demonstrating the automated extraction of secrets, permissions, and threat intelligence.
 
 ![HTML Security Dashboard](assets/dashboard.png)
+
 *Figure 1: Automated HTML Security Dashboard detailing vulnerability findings and VirusTotal telemetry.*
 
 ![Terminal CLI Execution](assets/cli-output.png)
+
 *Figure 2: Real-time CLI execution showing regex parsing, manifest auditing, and API interaction.*
 
 ---
