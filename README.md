@@ -29,9 +29,9 @@ An automated, enterprise-grade Static Application Security Testing (SAST) tool e
 * **Automated Reverse Engineering:** Utilizes Apktool to programmatically unpack and decompile Android binaries (APK to Smali/XML).
 * **Manifest & Component Auditing:** Identifies high-risk developer flags (`debuggable`, `allowBackup`) and improperly exported components (Activities, Services, Providers) to prevent lateral privilege escalation.
 * **Hardcoded Secret Discovery:** Employs targeted Regular Expressions (Regex) to extract leaked API keys, authentication tokens, and passwords directly from application resource files (`strings.xml`).
-* **Network Security Verification:** Audits application network configurations for insecure cleartext (HTTP) traffic allowances.
-* **Threat Intelligence Integration:** Computes cryptographic hashes (SHA-256) of target binaries and queries the **VirusTotal API** for global malware consensus and zero-day threat detection.
-* **Enterprise Reporting:** Generates a dynamic, structured HTML dashboard for Security Operations Center (SOC) review and SIEM ingestion readiness.
+* **Network Security Verification:** Checks `usesCleartextTraffic`, the network security config and the target API default to see whether the app allows cleartext (HTTP) traffic.
+* **Threat Intelligence Integration:** Computes cryptographic hashes (SHA-256) of target binaries and queries the **VirusTotal API** for global malware consensus.
+* **Enterprise Reporting:** Generates a dynamic, structured HTML dashboard for Security Operations Center (SOC) review.
 
 ## 🛠️ Technology Stack
 * **Core Language:** Python 3
@@ -49,8 +49,8 @@ An automated, enterprise-grade Static Application Security Testing (SAST) tool e
 ### Setup Instructions
 1. Clone the repository:
    ```bash
-   git clone [https://github.com/YOUR_USERNAME/android-sast-pipeline.git](https://github.com/YOUR_USERNAME/android-sast-pipeline.git)
-   cd android-sast-pipeline
+   git clone https://github.com/Subash-1507/Enterprise-apk-analyzer.git
+   cd Enterprise-apk-analyzer
 
    pip install requests
 
