@@ -61,12 +61,66 @@ def analyze_manifest(output_dir, report_data):
             else:
                 report_data["permissions"].append(f"<span class='safe'>&#10004; Standard: {perm}</span>")
 
+def get_target_sdk(output_dir):
+    """Reads targetSdkVersion from apktool.yml, where Apktool records it."""
+    yml_path = os.path.join(output_dir, "apktool.yml")
+    if not os.path.exists(yml_path):
+        return None
+    with open(yml_path, 'r', encoding='utf-8') as f:
+        match = re.search(r"targetSdkVersion:\s*['\"]?(\d+)", f.read())
+    return int(match.group(1)) if match else None
+
+def add_network_finding(report_data, level, msg):
+    """Prints a network finding and adds it to the report."""
+    icons = {"vuln": "&#10008;", "warning": "&#9888;", "safe": "&#10004;"}
+    labels = {"vuln": "[!] VULNERABILITY: ", "warning": "[!] WARNING: ", "safe": "[+] "}
+    print(f"{labels[level]}{msg}")
+    report_data["network"].append(f"<span class='{level}'>{icons[level]} {msg}</span>")
+
 def check_network_security(output_dir, report_data):
-    """Checks for insecure network configurations."""
+    """Checks whether the app allows cleartext (HTTP) traffic."""
+    manifest_path = os.path.join(output_dir, "AndroidManifest.xml")
+    if not os.path.exists(manifest_path):
+        return
+
     print("\n[*] Analyzing Network Security Configurations...")
-    msg = "Network security looks solid. No cleartext traffic explicitly permitted in modern config."
-    print(f"[+] {msg}")
-    report_data["network"].append(f"<span class='safe'>&#10004; {msg}</span>")
+    namespace = '{http://schemas.android.com/apk/res/android}'
+    app_element = ET.parse(manifest_path).getroot().find(".//application")
+    if app_element is None:
+        return
+
+    config_ref = app_element.attrib.get(f'{namespace}networkSecurityConfig')
+    if config_ref:
+        # Android ignores usesCleartextTraffic from API 24 when this config exists
+        source = "the network security config"
+        config_path = os.path.join(output_dir, "res", "xml", config_ref.split("/")[-1] + ".xml")
+        if not os.path.exists(config_path):
+            add_network_finding(report_data, "warning", f"Could not read the network security config {config_ref}.")
+            return
+        config_root = ET.parse(config_path).getroot()
+        base_config = config_root.find("base-config")
+        setting = base_config.attrib.get("cleartextTrafficPermitted") if base_config is not None else None
+        for domain_config in config_root.iter("domain-config"):
+            if domain_config.attrib.get("cleartextTrafficPermitted") == "true":
+                domains = ", ".join(d.text.strip() for d in domain_config.findall("domain") if d.text)
+                add_network_finding(report_data, "warning", f"Cleartext (HTTP) traffic allowed for: {domains}")
+    else:
+        source = "android:usesCleartextTraffic"
+        setting = app_element.attrib.get(f'{namespace}usesCleartextTraffic')
+
+    if setting == "true":
+        add_network_finding(report_data, "vuln", f"Cleartext (HTTP) traffic allowed by {source}.")
+    elif setting == "false":
+        add_network_finding(report_data, "safe", f"Cleartext (HTTP) traffic blocked by {source}.")
+    else:
+        # With no explicit setting, Android allows cleartext up to API 27 and blocks it from API 28
+        target_sdk = get_target_sdk(output_dir)
+        if target_sdk is None:
+            add_network_finding(report_data, "warning", "Could not read targetSdkVersion, so the cleartext default is unknown.")
+        elif target_sdk < 28:
+            add_network_finding(report_data, "vuln", f"App targets API {target_sdk} with no cleartext setting, so Android allows cleartext (HTTP) traffic by default.")
+        else:
+            add_network_finding(report_data, "safe", f"App targets API {target_sdk} with no cleartext setting, so Android blocks cleartext (HTTP) traffic by default.")
 
 def check_exported_components(output_dir, report_data):
     """Scans the manifest for explicitly exported components."""
@@ -110,7 +164,7 @@ def find_secrets(output_dir, report_data):
         for match in matches:
             msg = f"Type: {match[0].upper()} | Value: {match[1]}"
             print(f"[!] POTENTIAL SECRET FOUND - {msg}")
-            report_data["secrets"].append(f"<span class='vuln'>&#10008; Hardcoded Secret - {msg}</span>")
+            report_data["secrets"].append(f"<span class='vuln'>&#10008; Potential Secret - {msg}</span>")
 
 def check_virustotal(apk_path, report_data):
     """Calculates APK hash and queries VirusTotal API."""
@@ -198,7 +252,7 @@ def generate_html_report(report_data, target_apk):
                 <p>Target APK: <strong>{target_apk}</strong> | Scan Time: {date_time}</p>
             </div>
             <div class="academic-block">
-                <h3>Prepared by: Subhash Chandra Bose</h3>
+                <h3>Prepared by: Subash Chandra Bose</h3>
                 <p>Amrita School of Engineering | M.Tech Cybersecurity</p>
                 <p>Module: 24CY753 Mobile Security</p>
             </div>

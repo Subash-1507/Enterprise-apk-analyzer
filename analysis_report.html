@@ -27,10 +27,10 @@
         <div class="container">
             <div class="header">
                 <h1>Android Static Application Security Report</h1>
-                <p>Target APK: <strong>diva-beta.apk</strong> | Scan Time: 2026-05-11 16:00:53</p>
+                <p>Target APK: <strong>diva-beta.apk</strong> | Scan Time: 2026-11-04 11:01:02</p>
             </div>
             <div class="academic-block">
-                <h3>Prepared by: Subhash Chandra Bose</h3>
+                <h3>Prepared by: Subash Chandra Bose</h3>
                 <p>Amrita School of Engineering | M.Tech Cybersecurity</p>
                 <p>Module: 24CY753 Mobile Security</p>
             </div>
@@ -44,7 +44,7 @@
             </div>
             <div class="card">
                 <h2>3. Hardcoded Secrets (strings.xml)</h2>
-                <ul><li><span class='vuln'>&#10008; Hardcoded Secret - Type: PASSWORD | Value: Enter 3rd party service password</span></li><li><span class='vuln'>&#10008; Hardcoded Secret - Type: KEY | Value: notespin</span></li></ul>
+                <ul><li><span class='vuln'>&#10008; Potential Secret - Type: PASSWORD | Value: Enter 3rd party service password</span></li><li><span class='vuln'>&#10008; Potential Secret - Type: KEY | Value: notespin</span></li></ul>
             </div>
             <div class="card">
                 <h2>4. High-Risk Permissions</h2>
@@ -52,11 +52,11 @@
             </div>
             <div class="card">
                 <h2>5. Network Security</h2>
-                <ul><li><span class='safe'>&#10004; Network security looks solid. No cleartext traffic explicitly permitted in modern config.</span></li></ul>
+                <ul><li><span class='vuln'>&#10008; App targets API 23 with no cleartext setting, so Android allows cleartext (HTTP) traffic by default.</span></li></ul>
             </div>
             <div class="card">
                 <h2>6. Threat Intelligence (VirusTotal)</h2>
-                <ul><li><span class='safe'>&#10004; File is clean across 67 VT engines.</span></li></ul>
+                <ul><li><span class='safe'>&#10004; File is clean across 59 VT engines.</span></li></ul>
             </div>
         </div>
     </body>
